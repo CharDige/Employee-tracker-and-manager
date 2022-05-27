@@ -16,3 +16,13 @@ VALUES  ("Salesperson", 55000, 1),
         ("Admin Team Lead", 85000, 5),
         ("Legal Team Lead", 180000, 6),
         ("Sales Team Lead", 75000, 1);
+
+-- Insert data into employee table --
+INSERT INTO employee (first_name, last_name, role_id, manager_id)
+VALUES  ("Harry", "Amell", 2, null),
+        ("Jennifer", "Surana", 3, null),
+        ("Triss", "Tabris", 4, null),
+        ("Dmitri", "Mahariel", 5, null),
+        ("Damon", "Aeducan", 6, null),
+        ("Ella", "Brosca", 7, null),
+        ("Natalie", "Cousland", 1, 6);
