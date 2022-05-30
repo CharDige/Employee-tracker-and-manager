@@ -1,16 +1,9 @@
 // Import and require npm modules
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
-const express = require("express");
 const cTable = require("console.table");
 require("dotenv").config();
 
-const PORT = process.env.PORT || 3001;
-const app = express();
-
-// Express middleware
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
 
 // Connect to database
 const db = mysql.createConnection(
@@ -33,7 +26,7 @@ const beginPrompts = () => {
                 type: 'list',
                 name: 'choices',
                 message: "What would you like to do?",
-                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Finish"],
+                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Finish"],
             }
         ])
 
@@ -77,6 +70,8 @@ const beginPrompts = () => {
                 addRole();
             } else if (userChoice === "Add employee") {
                 addEmployee();
+            } else if (userChoice === "Update employee role") {
+                updateEmployeeRole();
             }
         });
 }
@@ -261,9 +256,71 @@ const addEmployee = () => {
         })
 }
 
+const updateEmployeeRole = () => {
+    const employeeSelect = [];
+
+    db.query('SELECT * FROM employee', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach(({ first_name, last_name, id }) => {
+            employeeSelect.push({
+                name: first_name + " " + last_name,
+                value: id
+            });
+        });
+    })
+
+    const roleSelect = [];
+
+    db.query('SELECT * from role', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach((role) => {
+            const roleObject = {
+                name: role.title,
+                value: role.id
+            }
+            roleSelect.push(roleObject);
+        })
+    })
+
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "test",
+                message: "This is a test"
+            },
+            {
+                type: "list",
+                name: "employeeName",
+                message: "Which employee's role do you want to update?",
+                choices: employeeSelect
+            },
+            {
+                type: "list",
+                name: "newRole",
+                message: "Which role do you want to assign the selected employee",
+                choices: roleSelect
+            }
+        ])
+
+        .then((data) => {
+            const answers = {
+                test: data.test,
+                name: data.employeeName,
+                role: data.newRole
+            }
+
+            console.log(answers.test);
+            console.log(answers.name);
+            console.log(answers.role);
+        })
+}
+
 
 beginPrompts();
-
-app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-  });
