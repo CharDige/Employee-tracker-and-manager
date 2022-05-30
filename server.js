@@ -174,7 +174,10 @@ const addRole = () => {
 }
 
 const addEmployee = () => {
-    const employeeList = [];
+    const employeeList = [{
+        name: "None",
+        value: null
+    }];
 
     db.query('SELECT * FROM employee', (err, results) => {
         if (err) {
