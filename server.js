@@ -33,7 +33,7 @@ const beginPrompts = () => {
                 type: 'list',
                 name: 'choices',
                 message: "What would you like to do?",
-                choices: ["View all departments", "View all roles", "View all employees", "Finish"],
+                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Finish"],
             }
         ])
 
@@ -44,6 +44,7 @@ const beginPrompts = () => {
 
             const userChoice = selection.choice;
 
+            // Testing prompt selection works
             console.log(userChoice);
 
             if(userChoice === "View all departments") {
@@ -70,8 +71,41 @@ const beginPrompts = () => {
                     console.table(results);
                     beginPrompts();
                 })
+            } else if (userChoice === "Add department") {
+                addDepartment();
             }
         });
+}
+
+const addDepartment = () => {
+    return inquirer
+        .prompt([
+            {
+                type: 'input',
+                name: "departmentName",
+                message: "What is the name of the department?"
+            }
+        ])
+
+        .then((data) => {
+            const answer = {
+                department: data.departmentName,
+            }
+
+            const newDepartment = answer.department;
+
+            // Testing department prompt input works
+            console.log(newDepartment);
+
+            db.query(`INSERT INTO department(name)
+                VALUES (?)`, newDepartment, (err, results) => {
+                    if (err) {
+                        console.log(err)
+                    }
+                    console.log("New department added!");
+                    beginPrompts();
+                })
+        })
 }
 
 beginPrompts();
