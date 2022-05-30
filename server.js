@@ -33,7 +33,7 @@ const beginPrompts = () => {
                 type: 'list',
                 name: 'choices',
                 message: "What would you like to do?",
-                choices: ["View all departments", "View all roles", "View all employees"],
+                choices: ["View all departments", "View all roles", "View all employees", "Finish"],
             }
         ])
 
@@ -54,6 +54,22 @@ const beginPrompts = () => {
                     console.table(results);
                     beginPrompts();
                 });
+            } else if (userChoice === "View all roles") {
+                db.query('SELECT role.id AS id, role.title AS title, department.name AS department, role.salary AS salary FROM role JOIN department ON role.department_id = department.id;', function(err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.table(results);
+                    beginPrompts();
+                })
+            } else if (userChoice === "View all employees") {
+                db.query('SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, role.title AS title, department.name AS department, role.salary AS salary, manager.first_name AS manager FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id LEFT OUTER JOIN employee manager ON employee.manager_id = manager.id;', function(err, results) {
+                    if (err) {
+                        console.log(err);
+                    }
+                    console.table(results);
+                    beginPrompts();
+                })
             }
         });
 }
