@@ -73,6 +73,8 @@ const beginPrompts = () => {
                 })
             } else if (userChoice === "Add department") {
                 addDepartment();
+            } else if (userChoice === "Add role") {
+                addRole();
             }
         });
 }
@@ -106,6 +108,68 @@ const addDepartment = () => {
                     beginPrompts();
                 })
         })
+}
+
+const addRole = () => {
+    const departmentList = [];
+
+    db.query('SELECT * FROM department', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+        results.forEach((department) => {
+            const deptObject = {
+                name: department.name,
+                value: department.id,
+            }
+            departmentList.push(deptObject);
+        }) 
+    })
+    
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "roleName",
+                message: "What is the name of the role?",
+            },
+            {
+                type: "input",
+                name: "roleSalary",
+                message: "What is the salary of this role?",
+            },
+            {
+                type: "list",
+                name: "roleDepartment",
+                message: "Which department does this role belong to?",
+                choices: departmentList
+            }
+        ])
+
+        .then((data) => {
+            const answers = {
+                name: data.roleName,
+                salary: data.roleSalary,
+                department: data.roleDepartment,
+            }
+
+            // Testing prompt inputs
+            console.log(answers.name);
+            console.log(answers.salary);
+            console.log(answers.department);
+
+            db.query(`INSERT INTO role(title, salary, department_id)
+                VALUES (?)`, [[answers.name, answers.salary, answers.department]], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    console.log('New role added!')
+
+                    beginPrompts();
+                })
+        })
+
 }
 
 beginPrompts();
