@@ -26,6 +26,40 @@ const db = mysql.createConnection(
     console.log(`Connected to the workplace_db database.`)
 );
 
+const beginPrompts = () => {
+    return inquirer
+        .prompt([
+            {
+                type: 'list',
+                name: 'choices',
+                message: "What would you like to do?",
+                choices: ["View all departments", "View all roles", "View all employees"],
+            }
+        ])
+
+        .then((data) => {
+            const selection = {
+                choice: data.choices,
+            }
+
+            const userChoice = selection.choice;
+
+            console.log(userChoice);
+
+            if(userChoice === "View all departments") {
+                db.query('SELECT * FROM department', function(err, results) {
+                    if (err) {
+                        console.log(err)
+                    }
+                    console.table(results);
+                    beginPrompts();
+                });
+            }
+        });
+}
+
+beginPrompts();
+
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`);
   });
