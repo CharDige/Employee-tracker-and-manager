@@ -75,6 +75,8 @@ const beginPrompts = () => {
                 addDepartment();
             } else if (userChoice === "Add role") {
                 addRole();
+            } else if (userChoice === "Add employee") {
+                addEmployee();
             }
         });
 }
@@ -164,13 +166,98 @@ const addRole = () => {
                         console.log(err);
                     }
 
-                    console.log('New role added!')
+                    console.log('New role added!');
 
                     beginPrompts();
                 })
         })
-
 }
+
+const addEmployee = () => {
+    const employeeList = [];
+
+    db.query('SELECT * FROM employee', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach(({ first_name, last_name, id }) => {
+            employeeList.push({
+                name: first_name + " " + last_name,
+                value: id
+            });
+        });
+    })
+
+    const roleList =[];
+
+    db.query('SELECT * FROM role', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach((role) => {
+            const roleObject = {
+                name: role.title,
+                value: role.id
+            }
+            roleList.push(roleObject);
+        })
+    })
+
+    inquirer
+        .prompt([
+            {
+                type: "input",
+                name: "employeeFirstName",
+                message: "What is this employee's first name?",
+            },
+            {
+                type: "input",
+                name: "employeeLastName",
+                message: "What is this employee's last name?",
+            },
+            {
+                type: "list",
+                name: "employeeRole",
+                message: "What is this employee's role?",
+                choices: roleList,
+            },
+            {
+                type: "list",
+                name: "employeeManager",
+                message: "Who is this employee's manager?",
+                choices: employeeList,
+            }
+        ])
+
+        .then((data) => {
+            const answers = {
+                firstName: data.employeeFirstName,
+                lastName: data.employeeLastName,
+                role: data.employeeRole,
+                manager: data.employeeManager
+            }
+
+            // Testing input prompts
+            console.log(answers.firstName);
+            console.log(answers.lastName);
+            console.log(answers.role);
+            console.log(answers.manager);
+
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id)
+                VALUES (?)`, [[answers.firstName, answers.lastName, answers.role, answers.manager]], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    console.log('New employee added!');
+
+                    beginPrompts();
+                })
+        })
+}
+
 
 beginPrompts();
 
