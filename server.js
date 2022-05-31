@@ -568,7 +568,7 @@ const viewDepartmentBudget = () => {
                 }
 
                 // MySQL query using inquirer prompt answer to determine the WHERE condition of this query
-                db.query(`SELECT department.name AS department, SUM(role.salary) AS total_salary FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?;`, [answer.department], (err, results) => {
+                db.query(`SELECT department.name AS department, SUM(role.salary) AS total_budget FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?;`, [answer.department], (err, results) => {
                     if (err) {
                         console.log(err);
                     }
