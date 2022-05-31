@@ -37,15 +37,12 @@ const beginPrompts = () => {
 
             const userChoice = selection.choice;
 
-            // Testing prompt selection works
-            console.log(userChoice);
-
             if(userChoice === "View all departments") {
                 db.query('SELECT * FROM department', function(err, results) {
                     if (err) {
                         console.log(err)
                     }
-                    console.table(results);
+                    console.table(`\n`, results);
                     beginPrompts();
                 });
             } else if (userChoice === "View all roles") {
@@ -53,15 +50,15 @@ const beginPrompts = () => {
                     if (err) {
                         console.log(err);
                     }
-                    console.table(results);
+                    console.table(`\n`, results);
                     beginPrompts();
                 })
             } else if (userChoice === "View all employees") {
-                db.query('SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, role.title AS title, department.name AS department, role.salary AS salary, manager.first_name AS manager FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id LEFT OUTER JOIN employee manager ON employee.manager_id = manager.id;', function(err, results) {
+                db.query('SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, role.title AS title, department.name AS department, role.salary AS salary, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id LEFT OUTER JOIN employee manager ON employee.manager_id = manager.id;', function(err, results) {
                     if (err) {
                         console.log(err);
                     }
-                    console.table(results);
+                    console.table(`\n`, results);
                     beginPrompts();
                 })
             } else if (userChoice === "Add department") {
@@ -72,6 +69,14 @@ const beginPrompts = () => {
                 addEmployee();
             } else if (userChoice === "Update employee role") {
                 updateEmployeeRole();
+            } else {
+                db.end((err) => {
+                    if (err) {
+                        return console.log(err);
+                    }
+
+                    console.log("Thank you for using the employee tracker and manager!");
+                });
             }
         });
 }
@@ -93,11 +98,7 @@ const addDepartment = () => {
 
             const newDepartment = answer.department;
 
-            // Testing department prompt input works
-            console.log(newDepartment);
-
-            db.query(`INSERT INTO department(name)
-                VALUES (?)`, newDepartment, (err, results) => {
+            db.query(`INSERT INTO department(name) VALUES (?)`, newDepartment, (err, results) => {
                     if (err) {
                         console.log(err)
                     }
@@ -121,9 +122,8 @@ const addRole = () => {
             }
             departmentList.push(deptObject);
         }) 
-    })
-    
-    inquirer
+
+        inquirer
         .prompt([
             {
                 type: "input",
@@ -150,13 +150,7 @@ const addRole = () => {
                 department: data.roleDepartment,
             }
 
-            // Testing prompt inputs
-            console.log(answers.name);
-            console.log(answers.salary);
-            console.log(answers.department);
-
-            db.query(`INSERT INTO role(title, salary, department_id)
-                VALUES (?)`, [[answers.name, answers.salary, answers.department]], (err, results) => {
+            db.query(`INSERT INTO role(title, salary, department_id) VALUES (?)`, [[answers.name, answers.salary, answers.department]], (err, results) => {
                     if (err) {
                         console.log(err);
                     }
@@ -166,6 +160,7 @@ const addRole = () => {
                     beginPrompts();
                 })
         })
+    })
 }
 
 const addEmployee = () => {
@@ -201,9 +196,8 @@ const addEmployee = () => {
             }
             roleList.push(roleObject);
         })
-    })
 
-    inquirer
+        inquirer
         .prompt([
             {
                 type: "input",
@@ -237,14 +231,7 @@ const addEmployee = () => {
                 manager: data.employeeManager
             }
 
-            // Testing input prompts
-            console.log(answers.firstName);
-            console.log(answers.lastName);
-            console.log(answers.role);
-            console.log(answers.manager);
-
-            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id)
-                VALUES (?)`, [[answers.firstName, answers.lastName, answers.role, answers.manager]], (err, results) => {
+            db.query(`INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES (?)`, [[answers.firstName, answers.lastName, answers.role, answers.manager]], (err, results) => {
                     if (err) {
                         console.log(err);
                     }
@@ -254,6 +241,7 @@ const addEmployee = () => {
                     beginPrompts();
                 })
         })
+    })
 }
 
 const updateEmployeeRole = () => {
@@ -286,15 +274,9 @@ const updateEmployeeRole = () => {
             }
             roleSelect.push(roleObject);
         })
-    })
 
-    inquirer
+        inquirer
         .prompt([
-            {
-                type: "input",
-                name: "test",
-                message: "This is a test"
-            },
             {
                 type: "list",
                 name: "employeeName",
@@ -311,16 +293,21 @@ const updateEmployeeRole = () => {
 
         .then((data) => {
             const answers = {
-                test: data.test,
                 name: data.employeeName,
                 role: data.newRole
             }
 
-            console.log(answers.test);
-            console.log(answers.name);
-            console.log(answers.role);
-        })
-}
+            db.query(`UPDATE employee SET ? WHERE ?? = ?`, [{role_id: answers.role}, "id", answers.name], (err, results) => {
+                if (err) {
+                    console.log(err);
+                }
 
+                console.log("Updated employee role!");
+
+                beginPrompts();
+            })
+        })
+    })
+}
 
 beginPrompts();
