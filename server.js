@@ -2,6 +2,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const cTable = require("console.table");
+const e = require("express");
 require("dotenv").config();
 
 
@@ -26,7 +27,7 @@ const beginPrompts = () => {
                 type: 'list',
                 name: 'choices',
                 message: "What would you like to do?",
-                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Finish"],
+                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Update employee manager", "Finish"],
             }
         ])
 
@@ -69,7 +70,12 @@ const beginPrompts = () => {
                 addEmployee();
             } else if (userChoice === "Update employee role") {
                 updateEmployeeRole();
-            } else {
+            } else if (userChoice === "Update employee manager") {
+                updateEmployeeManager();
+            }
+            
+            
+            else {
                 db.end((err) => {
                     if (err) {
                         return console.log(err);
@@ -307,6 +313,56 @@ const updateEmployeeRole = () => {
                 beginPrompts();
             })
         })
+    })
+}
+
+const updateEmployeeManager = () => {
+    const employeeList = [];
+
+    db.query('SELECT * FROM employee', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach(({ first_name, last_name, id }) => {
+            employeeList.push({
+                name: first_name + " " + last_name,
+                value: id
+            });
+        });
+
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "employee",
+                    message: "Which employee has had a change in manager?",
+                    choices: employeeList
+                },
+                {
+                    type: "list",
+                    name: "manager",
+                    message: "Who is this employee's new manager?",
+                    choices: employeeList
+                }
+            ])
+
+            .then((data) => {
+                const answers = {
+                    employee: data.employee,
+                    manager: data.manager
+                }
+
+                db.query(`UPDATE employee SET ? WHERE ?? = ?`, [{manager_id: answers.manager}, "id", answers.employee], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    console.log("Employee manager updated!");
+
+                    beginPrompts();
+                })
+            })
     })
 }
 
