@@ -20,3 +20,10 @@ SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name 
 FROM employee
 LEFT OUTER JOIN employee manager ON employee.manager_id = manager.id
 WHERE employee.manager_id = 2;
+
+-- Testing viewing employees by department --
+SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, role.title AS role, department.name AS department
+FROM employee
+JOIN role ON employee.role_id = role.id
+JOIN department ON role.department_id = department.id
+WHERE department.id = 2;
