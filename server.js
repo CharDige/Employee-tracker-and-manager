@@ -27,7 +27,7 @@ const beginPrompts = () => {
                 type: 'list',
                 name: 'choices',
                 message: "What would you like to do?",
-                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Update employee manager", "View employees by manager", "View employees by department", "Quit"],
+                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Update employee manager", "View employees by manager", "View employees by department", "View total budget of a department", "Quit"],
             }
         ])
 
@@ -76,6 +76,8 @@ const beginPrompts = () => {
                 viewEmployeeManager();
             } else if (userChoice === "View employees by department") {
                 viewEmployeeDepartment();
+            } else if (userChoice === "View total budget of a department") {
+                viewDepartmentBudget();
             }
             
             
@@ -445,6 +447,49 @@ const viewEmployeeDepartment = () => {
                 }
 
                 db.query(`SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, role.title AS role, department.name AS department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?`, [answer.department], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    console.table(`\n`, results);
+                    beginPrompts();
+                })
+            })
+    })
+}
+
+const viewDepartmentBudget = () => {
+    const departmentList = [];
+
+    db.query('SELECT * FROM department', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach((department) => {
+            const deptObject = {
+                name: department.name,
+                value: department.id
+            }
+            departmentList.push(deptObject);
+        })
+
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "department",
+                    message: "Select the department you wish to see the total budget of",
+                    choices: departmentList
+                }
+            ])
+
+            .then((data) => {
+                const answer = {
+                    department: data.department
+                }
+
+                db.query(`SELECT department.name AS department, SUM(role.salary) AS total_salary FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?;`, [answer.department], (err, results) => {
                     if (err) {
                         console.log(err);
                     }
