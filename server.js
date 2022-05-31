@@ -472,7 +472,7 @@ const viewEmployeeManager = () => {
                     }
 
                     // View results via console.table
-                    console.table(`/n`, results);
+                    console.table(`\n`, results);
 
                     // Restart beginPrompts() function to show user list of initial selections again
                     beginPrompts();
