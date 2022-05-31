@@ -2,7 +2,7 @@
 const inquirer = require("inquirer");
 const mysql = require("mysql2");
 const cTable = require("console.table");
-const e = require("express");
+const figlet = require("figlet");
 require("dotenv").config();
 
 
@@ -17,7 +17,19 @@ const db = mysql.createConnection(
         // MySQL database
         database: process.env.DB_NAME,
     },
-    console.log(`Connected to the workplace_db database.`)
+    figlet.text('Employee tracker and manager', {
+        font: 'Standard',
+        horizontalLayout: 'default',
+        verticalLayout: 'default',
+        width: 100,
+        whitespaceBreak: true
+    }, function(err, data) {
+        if (err) {
+            console.log(err);
+        }
+        console.log(data);
+        beginPrompts();
+    }),
 );
 
 const beginPrompts = () => {
@@ -634,5 +646,3 @@ deleteEmployee = () => {
             })
     })
 }
-
-beginPrompts();
