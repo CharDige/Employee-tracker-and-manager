@@ -27,7 +27,7 @@ const beginPrompts = () => {
                 type: 'list',
                 name: 'choices',
                 message: "What would you like to do?",
-                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Update employee manager", "Finish"],
+                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Update employee manager", "View employees by manager", "Finish"],
             }
         ])
 
@@ -72,6 +72,8 @@ const beginPrompts = () => {
                 updateEmployeeRole();
             } else if (userChoice === "Update employee manager") {
                 updateEmployeeManager();
+            } else if (userChoice === "View employees by manager") {
+                viewEmployeeManager();
             }
             
             
@@ -359,6 +361,51 @@ const updateEmployeeManager = () => {
                     }
 
                     console.log("Employee manager updated!");
+
+                    beginPrompts();
+                })
+            })
+    })
+}
+
+const viewEmployeeManager = () => {
+    const employeeList = [];
+
+    db.query('SELECT * FROM employee WHERE employee.manager_id IS NULL', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach(({ first_name, last_name, id }) => {
+            employeeList.push({
+                name: first_name + " " + last_name,
+                value: id
+            })
+        })
+
+        console.log(employeeList);
+
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "manager",
+                    message: "Select a manager to see they're employees",
+                    choices: employeeList
+                }
+            ])
+
+            .then((data) => {
+                const answer = {
+                    manager: data.manager
+                }
+
+                db.query(`SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, CONCAT(manager.first_name, " ", manager.last_name) AS manager FROM employee LEFT OUTER JOIN employee manager ON employee.manager_id = manager.id WHERE employee.manager_id = ?;`, [answer.manager], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    console.table(`/n`, results);
 
                     beginPrompts();
                 })
