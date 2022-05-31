@@ -80,6 +80,8 @@ const beginPrompts = () => {
                 viewDepartmentBudget();
             } else if (userChoice === "Remove department") {
                 deleteDepartment();
+            } else if (userChoice === "Remove role") {
+                deleteRole();
             }
             
             
@@ -540,6 +542,50 @@ const deleteDepartment = () => {
                     }
 
                     console.log("Department has been removed from the database!")
+
+                    beginPrompts();
+                })
+            })
+    })
+}
+
+const deleteRole = () => {
+    const roleList = [];
+
+    db.query('SELECT * FROM role', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach((role) => {
+            const roleObject = {
+                name: role.title,
+                value: role.id
+            }
+            roleList.push(roleObject);
+        })
+
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "role",
+                    message: "Which role would you like to remove?",
+                    choices: roleList
+                }
+            ])
+
+            .then((data) => {
+                const answer = {
+                    role: data.role
+                }
+
+                db.query(`DELETE FROM role WHERE role.id = ?`, [answer.role], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    console.log("Role has been removed from the database!")
 
                     beginPrompts();
                 })
