@@ -27,7 +27,7 @@ const beginPrompts = () => {
                 type: 'list',
                 name: 'choices',
                 message: "What would you like to do?",
-                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Update employee manager", "View employees by manager", "Finish"],
+                choices: ["View all departments", "View all roles", "View all employees", "Add department", "Add role", "Add employee", "Update employee role", "Update employee manager", "View employees by manager", "View employees by department", "Quit"],
             }
         ])
 
@@ -74,6 +74,8 @@ const beginPrompts = () => {
                 updateEmployeeManager();
             } else if (userChoice === "View employees by manager") {
                 viewEmployeeManager();
+            } else if (userChoice === "View employees by department") {
+                viewEmployeeDepartment();
             }
             
             
@@ -383,8 +385,6 @@ const viewEmployeeManager = () => {
             })
         })
 
-        console.log(employeeList);
-
         inquirer
             .prompt([
                 {
@@ -407,6 +407,49 @@ const viewEmployeeManager = () => {
 
                     console.table(`/n`, results);
 
+                    beginPrompts();
+                })
+            })
+    })
+}
+
+const viewEmployeeDepartment = () => {
+    const departmentList = [];
+
+    db.query('SELECT * FROM department', (err, results) => {
+        if (err) {
+            console.log(err);
+        }
+
+        results.forEach((department) => {
+            const deptObject = {
+                name: department.name,
+                value: department.id
+            }
+            departmentList.push(deptObject);
+        })
+
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "department",
+                    message: "Select department to list of employees within that department",
+                    choices: departmentList
+                }
+            ])
+
+            .then((data) => {
+                const answer = {
+                    department: data.department
+                }
+
+                db.query(`SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, role.title AS role, department.name AS department FROM employee JOIN role ON employee.role_id = role.id JOIN department ON role.department_id = department.id WHERE department.id = ?`, [answer.department], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    console.table(`\n`, results);
                     beginPrompts();
                 })
             })
