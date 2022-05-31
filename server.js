@@ -82,10 +82,9 @@ const beginPrompts = () => {
                 deleteDepartment();
             } else if (userChoice === "Remove role") {
                 deleteRole();
-            }
-            
-            
-            else {
+            } else if (userChoice === "Remove employee") {
+                deleteEmployee();
+            } else {
                 db.end((err) => {
                     if (err) {
                         return console.log(err);
@@ -586,6 +585,49 @@ const deleteRole = () => {
                     }
 
                     console.log("Role has been removed from the database!")
+
+                    beginPrompts();
+                })
+            })
+    })
+}
+
+deleteEmployee = () => {
+    const employeeList = [];
+
+    db.query('SELECT * FROM employee', (err, results) => {
+        if (err) {
+            console.log(err)
+        }
+
+        results.forEach(({ first_name, last_name, id }) => {
+            employeeList.push({
+                name: first_name + " " + last_name,
+                value: id
+            })
+        })
+
+        inquirer
+            .prompt([
+                {
+                    type: "list",
+                    name: "employee",
+                    message: "Which employee would you like to remove?",
+                    choices: employeeList
+                }
+            ])
+
+            .then((data) => {
+                const answer = {
+                    employee: data.employee
+                }
+
+                db.query(`DELETE FROM employee WHERE employee.id = ?`, [answer.employee], (err, results) => {
+                    if (err) {
+                        console.log(err);
+                    }
+
+                    console.log("Employee has been removed from the database!");
 
                     beginPrompts();
                 })
