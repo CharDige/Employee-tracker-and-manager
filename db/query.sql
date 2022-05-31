@@ -9,3 +9,14 @@ FROM employee
 JOIN role ON employee.role_id = role.id
 JOIN department ON role.department_id = department.id
 LEFT OUTER JOIN employee manager ON employee.manager_id = manager.id;
+
+-- Testing viewing employees by manager --
+SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, CONCAT(manager.first_name, " ", manager.last_name) AS manager 
+FROM employee
+LEFT OUTER JOIN employee manager ON employee.manager_id = manager.id
+WHERE employee.manager_id IS NULL;
+
+SELECT employee.id AS id, employee.first_name AS first_name, employee.last_name AS last_name, CONCAT(manager.first_name, " ", manager.last_name) AS manager
+FROM employee
+LEFT OUTER JOIN employee manager ON employee.manager_id = manager.id
+WHERE employee.manager_id = 2;
