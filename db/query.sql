@@ -27,3 +27,10 @@ FROM employee
 JOIN role ON employee.role_id = role.id
 JOIN department ON role.department_id = department.id
 WHERE department.id = 2;
+
+-- Testing getting the sum of a budget --
+SELECT department.name AS department, SUM(role.salary) AS total_salary
+FROM employee
+JOIN role ON employee.role_id = role.id
+JOIN department ON role.department_id = department.id
+WHERE department.id = 2;
